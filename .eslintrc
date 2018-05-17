@@ -6,6 +6,7 @@
     "browser": true
   },
   "rules": {
-    
+    "prefer-template": "warn",
+    "no-console": "off"
   }
 }
