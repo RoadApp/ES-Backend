@@ -5,8 +5,8 @@ module.exports = (app) => {
 
   controller.login = (req, res) => {
     User.find().then((result) => {
-      if (result) {
-        console.log(result);
+      if (result && result.length) {
+        console.log('users', result);
         res.json('ooa, make login.');
       } else {
         res.json('so, signup');
