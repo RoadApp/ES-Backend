@@ -1,6 +1,6 @@
-var server = require('./config/serverConfig.js');
+const server = require('./config/express');
 
-server.get('/', function (req, res) {
-   console.log('server check');
-   res.json({"message": "Server On"});
+server.get('/', (req, res) => {
+  console.log('server check');
+  res.json({ message: 'Server On' });
 });
