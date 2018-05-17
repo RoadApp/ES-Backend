@@ -1,6 +1,10 @@
-const server = require('./config/express');
+const http = require('http');
+const app = require('./config/express')();
+require('./config/database')('mongodb://localhost/esbackend');
 
-server.get('/', (req, res) => {
-  console.log('server check');
-  res.json({ message: 'Server On' });
-});
+const port = app.get('port');
+
+http.createServer(app)
+  .listen(port, () => {
+    console.log(`Express Server listening on port ${port}`);
+  });
