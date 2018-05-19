@@ -9,6 +9,7 @@
     "prefer-template": "warn",
     "no-console": "off",
     "comma-dangle": ["error", "never"],
-    "no-extra-parens": "error"
+    "no-extra-parens": "error",
+    "linebreak-style": 0
   }
 }
