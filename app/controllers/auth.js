@@ -7,7 +7,7 @@ module.exports = (app) => {
     User.find().then((result) => {
       if (result && result.length) {
         console.log('users', result);
-        res.json('ooa, make login.');
+        res.json('ooaá, make login.');
       } else {
         res.json('so, signup');
       }
