@@ -1,5 +1,5 @@
-module.exports = (app) => {
-  const Car = app.models.car;
+module.exports = () => {
+  // const Car = app.models.car;
 
   const controller = {};
 
