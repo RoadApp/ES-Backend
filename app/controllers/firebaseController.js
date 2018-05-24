@@ -1,36 +1,29 @@
+const firebaseAdmin = require('firebase-admin');
+
+const auth = firebaseAdmin.auth();
+
 module.exports = () => {
-  const firebaseAdmin = require('firebase-admin');
-
-  const auth = firebaseAdmin.auth();
-
   const firebaseController = {};
 
-
   firebaseController.getUid = (idToken) => {
-    auth.verifyIdToken(idToken).then((decodedToken) => {
-      return decodedToken.uid;
-    }).catch((error) => {
-      console.log(error);
-      throw Error('Authentication Error: invalid token');
-    });
+    auth
+      .verifyIdToken(idToken)
+      .then((decodedToken) => decodedToken.uid)
+      .catch((error) => {
+        console.log(error);
+        throw Error('Authentication Error: invalid token');
+      });
   };
 
-  firebaseController.getUserRecordById = (uid) => {
-    return auth.getUser(uid);
-  };
+  firebaseController.getUserRecordById = (uid) => auth.getUser(uid);
 
-  firebaseController.blockUser = (uid) => {
-    return auth.updateUser(uid, {
-      disabled: true
-    });
-  };
+  firebaseController.blockUser = (uid) => auth.updateUser(uid, {
+    disabled: true
+  });
 
-  firebaseController.unBlockUser = (uid) => {
-    return auth.updateUser(uid, {
-      disabled: false
-    });
-  };
-
+  firebaseController.unBlockUser = (uid) => auth.updateUser(uid, {
+    disabled: false
+  });
 
   // exports.createFirebaseUser = function (name, email, password, callback) {
   //   auth.createUser({
