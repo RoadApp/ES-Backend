@@ -6,21 +6,25 @@ const UserSchema = mongoose.Schema({
     required: true,
     default: Date.now
   },
-  username: {
-    type: String,
-    trim: true,
-    unique: true,
-    required: true
-  },
-  password: {
+  fullName: {
     type: String,
     trim: true,
     required: true
   },
-  name: {
+  firebaseUid: {
     type: String,
     trim: true,
     required: true
+  },
+  cars: {
+    type: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        model: 'Car'
+      }
+    ],
+    required: true,
+    default: []
   }
 });
 
