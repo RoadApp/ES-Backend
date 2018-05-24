@@ -3,11 +3,6 @@ const load = require('express-load');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
 
-const server = express();
-
-server.listen(5000);
-server.use(bodyParser.json());
-
 module.exports = () => {
   const app = express();
 
