@@ -1,7 +1,6 @@
 const http = require('http');
-require('./config/firebase')();
 const app = require('./config/express')();
-require('./config/database')('mongodb://localhost/esbackend');
+require('./config/database')('mongodb://localhost/road');
 
 const port = app.get('port');
 

@@ -1,5 +1,6 @@
 module.exports = (app) => {
   const controller = app.controllers.auth;
 
-  app.route('/checkUser').post(controller.checkUser);
+  app.route('/login').post(controller.login);
+  app.route('/logout').post(controller.logout);
 };

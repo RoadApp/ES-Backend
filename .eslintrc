@@ -12,6 +12,8 @@
     "no-extra-parens": "error",
     "linebreak-style": 0,
     "max-len": ["error", { "code": 80 }],
-    "arrow-parens": ["error", "always"]
+    "arrow-parens": ["error", "always"],
+    "no-underscore-dangle": "off",
+    "consistent-return": "warn"
   }
 }

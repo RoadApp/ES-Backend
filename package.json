@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.2",
     "express": "^4.16.3",
     "express-load": "^1.1.16",
@@ -18,7 +19,8 @@
     "mongo-sanitize": "^1.0.0",
     "mongoose": "^5.1.1",
     "passport": "^0.4.0",
-    "passport-local": "^1.0.0"
+    "passport-jwt": "^4.0.0",
+    "uuid": "^3.2.1"
   },
   "devDependencies": {
     "eslint": "^4.19.1",
