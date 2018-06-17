@@ -5,6 +5,18 @@ module.exports = (app) => {
 
   const controller = {};
 
+  const makeReturnedUser = (user) => {
+    const userReturn = {
+      _id: user._id,
+      email: user.email,
+      fullName: user.fullName,
+      token: user.token,
+      cars: user.cars
+    };
+
+    return userReturn;
+  };
+
   controller.list = (req, res) => {
     User.find({}, 'fullName email cars')
       .sort({ fullName: 1 })
@@ -27,7 +39,7 @@ module.exports = (app) => {
           console.log(`error: ${error}`);
           return res.status(500).json(error);
         }
-        return res.status(200).json(user);
+        return res.status(200).json(makeReturnedUser(user));
       });
   };
 
@@ -49,22 +61,16 @@ module.exports = (app) => {
         return res.status(500).json(errorToReturn);
       }
 
-      const userReturn = {
-        _id: user._id,
-        email: user.email,
-        fullName: user.fullName,
-        token: user.token
-      };
-      return res.status(201).json(userReturn);
+      return res.status(201).json(makeReturnedUser(user));
     });
   };
 
   controller.update = (req, res) => {
     const data = {};
     data.fullName = req.body.fullName;
-    data.email = req.body.email;
 
     const _id = sanitize(req.params.id);
+
     User.findOneAndUpdate({ _id }, data, { new: true })
       .lean(true)
       .exec((error, user) => {
@@ -72,7 +78,7 @@ module.exports = (app) => {
           console.log(`error: ${error}`);
           return res.status(500).json(error);
         }
-        return res.status(200).json(user);
+        return res.status(200).json(makeReturnedUser(user));
       });
   };
 
