@@ -6,8 +6,8 @@ module.exports = (app) => {
 
   app
     .route('/user/:id')
-    .get(controller.get)
-    .put(controller.update)
+    .get(permissionUtils.isLoggedIn, controller.get)
+    .put(permissionUtils.isLoggedIn, controller.update)
     .delete(permissionUtils.isLoggedIn, controller.delete);
 
   app
