@@ -5,21 +5,30 @@ module.exports = (uri) => {
 
   const firstUser = () => {
     const User = mongoose.model('User');
-    User.findOne({ email: 'italomlporoca@hotmail.com' }, (err, user) => {
-      if (!user) {
-        const newUser = new User();
-        newUser.fullName = 'Italo Menezes';
-        newUser.email = 'italomlporoca@hotmail.com';
-        newUser.password = newUser.generateHash('123456');
-        newUser.save((error) => {
-          if (error) {
-            console.log(error);
-          } else {
-            console.log('First user created!');
-          }
-        });
-      }
-    });
+    User.find()
+      .exec()
+      .then((users) => {
+        if (!users.length) {
+          User.findOne({ email: 'admin@email.com' }, (err, user) => {
+            if (!user) {
+              const newUser = new User();
+              newUser.fullName = 'Admin Example';
+              newUser.email = 'admin@email.com';
+              newUser.password = newUser.generateHash('eutenhoumviolaorosa');
+              newUser.save((error) => {
+                if (error) {
+                  console.log(error);
+                } else {
+                  console.log('First user created!');
+                }
+              });
+            }
+          });
+        }
+      })
+      .catch((error) => {
+        console.log('Error:', error);
+      });
   };
 
   mongoose.connection.on('connected', () => {
