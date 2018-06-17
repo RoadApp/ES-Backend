@@ -39,11 +39,21 @@ const UserSchema = mongoose.Schema({
   }
 });
 
+/**
+ * Generate hash for password
+ * @param {*} password
+ * @return {string} password hash
+ */
 // eslint-disable-next-line func-names
 UserSchema.methods.generateHash = function (password) {
   return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
 };
 
+/**
+ * Verify if password passed is equals of atual user
+ * @param {*} password
+ * @return {boolean} true if is equals, false otherwise
+ */
 // eslint-disable-next-line func-names
 UserSchema.methods.verifyPassword = function (password) {
   return bcrypt.compareSync(password, this.password);

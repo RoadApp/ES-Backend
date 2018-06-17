@@ -5,6 +5,11 @@ module.exports = (app) => {
 
   const controller = {};
 
+  /**
+   * Make an user object without unnecessary properties (e.g. mongo attributes)
+   * @param {*} user mongoose object of user
+   * @return {Object} lean user
+   */
   const makeReturnedUser = (user) => {
     const userReturn = {
       _id: user._id,
@@ -17,6 +22,12 @@ module.exports = (app) => {
     return userReturn;
   };
 
+  /**
+   * List all users
+   * @param {*} req
+   * @param {*} res
+   * @return {Array} users
+   */
   controller.list = (req, res) => {
     User.find({}, 'fullName email cars')
       .sort({ fullName: 1 })
@@ -30,6 +41,12 @@ module.exports = (app) => {
       });
   };
 
+  /**
+   * Return an user with id passed in params
+   * @param {*} req
+   * @param {*} res
+   * @return {Object} user
+   */
   controller.get = (req, res) => {
     const _id = sanitize(req.params.id);
     User.findOne({ _id })
@@ -43,6 +60,12 @@ module.exports = (app) => {
       });
   };
 
+  /**
+   * Add an user with passed properties
+   * @param {*} req
+   * @param {*} res
+   * @return {Object} user
+   */
   controller.add = (req, res) => {
     const newUser = new User();
     newUser.fullName = req.body.fullName;
@@ -65,6 +88,12 @@ module.exports = (app) => {
     });
   };
 
+  /**
+   * Update user that has the _id passed in params
+   * @param {*} req
+   * @param {*} res
+   * @return {Object} user updated
+   */
   controller.update = (req, res) => {
     const data = {};
     data.fullName = req.body.fullName;
@@ -82,6 +111,11 @@ module.exports = (app) => {
       });
   };
 
+  /**
+   * Delete an user that has _id passed in params
+   * @param {*} req
+   * @param {*} res
+   */
   controller.delete = (req, res) => {
     const _id = sanitize(req.params.id);
 
@@ -94,6 +128,11 @@ module.exports = (app) => {
     });
   };
 
+  /**
+   * Change password of logged user
+   * @param {*} req
+   * @param {*} res
+   */
   controller.changePassword = (req, res) => {
     const { _id } = req.user;
     User.findOne({ _id })

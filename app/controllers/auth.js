@@ -5,6 +5,12 @@ module.exports = (app) => {
 
   const controller = {};
 
+  /**
+   * Login method. Require email and password in req.body
+   * @param {*} req
+   * @param {*} res
+   * @return {Object} user with token
+   */
   controller.login = (req, res) => {
     User.findOne({ email: req.body.email })
       .exec()
@@ -41,6 +47,11 @@ module.exports = (app) => {
       });
   };
 
+  /**
+   * Logout method. Require only an _id in req.body
+   * @param {*} req
+   * @param {*} res
+   */
   controller.logout = (req, res) => {
     const { _id } = req.body;
     User.findByIdAndUpdate(_id, { token: null }, (error) => {
