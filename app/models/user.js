@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt-nodejs');
 
 const UserSchema = mongoose.Schema({
-  created_at: {
+  createdAt: {
     type: Date,
     required: true,
     default: Date.now
