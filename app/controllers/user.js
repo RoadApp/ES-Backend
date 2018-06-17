@@ -12,9 +12,9 @@ module.exports = (app) => {
       .exec((error, users) => {
         if (error) {
           console.log(`error: ${error}`);
-          res.status(500).json(error);
+          return res.status(500).json(error);
         }
-        res.status(200).json(users);
+        return res.status(200).json(users);
       });
   };
 
@@ -25,9 +25,9 @@ module.exports = (app) => {
       .exec((error, user) => {
         if (error) {
           console.log(`error: ${error}`);
-          res.status(500).json(error);
+          return res.status(500).json(error);
         }
-        res.status(200).json(user);
+        return res.status(200).json(user);
       });
   };
 
@@ -39,9 +39,23 @@ module.exports = (app) => {
     newUser.save((error, user) => {
       if (error) {
         console.log(`error: ${error}`);
-        res.status(500).json(error);
+        const errorToReturn = {};
+        if (error.code === 1100) {
+          errorToReturn.message = 'Já existe um usuário com esse email.';
+        } else {
+          errorToReturn.message =
+            'Não foi possível criar usuário. Consulte um desenvolvedor do app.';
+        }
+        return res.status(500).json(errorToReturn);
       }
-      res.status(201).json(user);
+
+      const userReturn = {
+        _id: user._id,
+        email: user.email,
+        fullName: user.fullName,
+        token: user.token
+      };
+      return res.status(201).json(userReturn);
     });
   };
 
@@ -56,50 +70,50 @@ module.exports = (app) => {
       .exec((error, user) => {
         if (error) {
           console.log(`error: ${error}`);
-          res.status(500).json(error);
+          return res.status(500).json(error);
         }
-        res.status(200).json(user);
+        return res.status(200).json(user);
       });
   };
 
   controller.delete = (req, res) => {
     const _id = sanitize(req.params.id);
 
-    User.findOneAndUpdate({ _id }, { new: true })
-      .lean(true)
-      .exec((error) => {
-        if (error) {
-          console.log(`error: ${error}`);
-          res.status(500).json(error);
-        }
-        res.status(200).end();
-      });
+    User.findByIdAndDelete(_id).exec((error) => {
+      if (error) {
+        console.log(`error: ${error}`);
+        return res.status(500).json(error);
+      }
+      return res.status(200).end();
+    });
   };
 
   controller.changePassword = (req, res) => {
     const { _id } = req.user;
-    User.findOne({ _id }).exec((error, user) => {
-      if (error) {
-        console.log(`error: ${error}`);
-        res.status(500).json(error);
-      }
-      if (user.validPassword(req.body.old_password)) {
-        const data = {};
-        data.password = user.generateHash(req.body.password);
+    User.findOne({ _id })
+      .exec()
+      .then((user) => {
+        if (user.verifyPassword(req.body.oldPassword)) {
+          const data = {};
+          data.password = user.generateHash(req.body.password);
 
-        User.findOneAndUpdate({ _id }, data, { new: false })
-          .lean(true)
-          .exec((err) => {
-            if (err) {
-              console.log(`error: ${err}`);
-              res.status(500).json(err);
-            }
-            res.status(200).end();
-          });
-      } else {
-        res.status(500).end();
-      }
-    });
+          User.findOneAndUpdate({ _id }, data, { new: false })
+            .lean(true)
+            .exec((err) => {
+              if (err) {
+                console.log(`error: ${err}`);
+                return res.status(500).json(err);
+              }
+              return res.status(200).end();
+            });
+        } else {
+          return res.status(500).end();
+        }
+      })
+      .catch((error) => {
+        console.log(`error: ${error}`);
+        return res.status(500).json(error);
+      });
   };
 
   return controller;

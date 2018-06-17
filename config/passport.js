@@ -1,9 +1,10 @@
 const passport = require('passport');
 // const LocalStrategy = require('passport-local');
-const Jwt = require('passport-jwt');
+// const Jwt = require('passport-jwt');
+const BearerStrategy = require('passport-http-bearer');
 
-const JwtStrategy = Jwt.Strategy;
-const { ExtractJwt } = Jwt;
+// const JwtStrategy = Jwt.Strategy;
+// const { ExtractJwt } = Jwt;
 
 const mongoose = require('mongoose');
 
@@ -19,50 +20,19 @@ module.exports = () => {
       done(error, user);
     });
   });
+  passport.use(
+    'bearer',
+    new BearerStrategy((token, cb) => {
+      User.findOne({ token }, (err, user) => {
+        if (err) {
+          return cb(err);
+        }
+        if (!user) {
+          return cb(null, false);
+        }
 
-  // passport.use(new LocalStrategy(
-  //   {
-  //     usernameField: 'email',
-  //     passwordField: 'password',
-  //     session: false
-  //   },
-  //   (email, password, done) => {
-  //     User.findOne({ email })
-  //       .exec()
-  //       .then((user) => {
-  //         if (!user) {
-  //           done(null, false);
-  //         } else if (!user.verifyPassword(password)) {
-  //           done(null);
-  //         } else {
-  //           done(null, user);
-  //         }
-  //       })
-  //       .catch((error) => {
-  //         done(error);
-  //       });
-  //   }
-  // ));
-  passport.use(new JwtStrategy(
-    {
-      secretOrKey: 'oi',
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: true
-    },
-    (jwtPayload, done) => {
-      const email = jwtPayload.sub;
-      User.findOne({ email })
-        .exec()
-        .then((user) => {
-          if (!user) {
-            done(null, false);
-          } else {
-            done(null, user);
-          }
-        })
-        .catch((error) => {
-          done(error, false);
-        });
-    }
-  ));
+        return cb(null, user);
+      });
+    })
+  );
 };

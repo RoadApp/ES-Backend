@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt-nodejs');
 
-const NOT_A_TOKEN = 'NAT';
-
 const UserSchema = mongoose.Schema({
   created_at: {
     type: Date,
@@ -17,7 +15,8 @@ const UserSchema = mongoose.Schema({
   email: {
     type: String,
     trim: true,
-    required: true
+    required: true,
+    unique: true
   },
   password: {
     type: String,
@@ -26,9 +25,7 @@ const UserSchema = mongoose.Schema({
   },
   token: {
     type: String,
-    trim: true,
-    required: true,
-    default: NOT_A_TOKEN
+    trim: true
   },
   cars: {
     type: [

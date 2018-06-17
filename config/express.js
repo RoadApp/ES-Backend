@@ -14,6 +14,7 @@ module.exports = () => {
   app.use(helmet());
 
   load('models', { cwd: 'app' })
+    .then('utils')
     .then('controllers')
     .then('routes')
     .into(app);

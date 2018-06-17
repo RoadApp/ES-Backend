@@ -42,8 +42,8 @@ module.exports = (app) => {
   };
 
   controller.logout = (req, res) => {
-    const _id = req.body.id;
-    User.findByIdAndUpdate(_id, { token: 'NAT' }, (error) => {
+    const { _id } = req.body;
+    User.findByIdAndUpdate(_id, { token: null }, (error) => {
       if (error) {
         console.log('Error:', error);
         return res.status(500).json(error);
