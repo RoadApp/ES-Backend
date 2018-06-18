@@ -20,8 +20,9 @@ const CarSchema = mongoose.Schema({
   },
   plate: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   }
-}); // To be incremented
+});
 
 module.exports = () => mongoose.model('Car', CarSchema);
