@@ -26,16 +26,6 @@ const UserSchema = mongoose.Schema({
   token: {
     type: String,
     trim: true
-  },
-  cars: {
-    type: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        model: 'Car'
-      }
-    ],
-    required: true,
-    default: []
   }
 });
 

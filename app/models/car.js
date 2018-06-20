@@ -6,6 +6,11 @@ const CarSchema = mongoose.Schema({
     required: true,
     default: Date.now
   },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   brand: {
     type: String,
     required: true
