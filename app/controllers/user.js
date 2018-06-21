@@ -1,4 +1,4 @@
-const sanitize = require('mongo-sanitize');
+// const sanitize = require('mongo-sanitize');
 const validator = require('validator');
 
 module.exports = (app) => {
@@ -31,7 +31,6 @@ module.exports = (app) => {
    * @param {object} user object that contains fullName, email and/or password
    */
   const validateUser = (updating, { fullName, email, password }) => {
-    // console.log(validator.isEmail(email));
     let isValid = true;
     isValid = fullName && isValid ? fullName.length >= 5 : updating;
     if (!updating) {
@@ -42,7 +41,7 @@ module.exports = (app) => {
   };
 
   /**
-   * List all users
+   * List all users. (Actually, there is no route for this.)
    * @param {*} req
    * @param {*} res
    * @return {Array} users
@@ -61,16 +60,13 @@ module.exports = (app) => {
   };
 
   /**
-   * Return an user with id passed in params
+   * Return user logged in.
    * @param {*} req
    * @param {*} res
    * @return {Object} user
    */
   controller.get = (req, res) => {
-    const _id = sanitize(req.params.id);
-    if (_id !== req.user._id) {
-      return res.status(403).end();
-    }
+    const { _id } = req.user;
     User.findOne({ _id })
       .lean(true)
       .exec((error, user) => {
@@ -115,7 +111,7 @@ module.exports = (app) => {
   };
 
   /**
-   * Update user that has the _id passed in params
+   * Update user logged in with body.
    * @param {*} req
    * @param {*} res
    * @return {Object} user updated
@@ -128,11 +124,7 @@ module.exports = (app) => {
       return res.status(500).json(new Error('User invalid'));
     }
 
-    const _id = sanitize(req.params.id);
-
-    if (_id !== `${req.user._id}`) {
-      return res.status(403).end();
-    }
+    const { _id } = req.user;
 
     User.findOneAndUpdate({ _id }, data, { new: true })
       .lean(true)
@@ -146,17 +138,12 @@ module.exports = (app) => {
   };
 
   /**
-   * Delete an user that has _id passed in params
+   * Delete user logged in and his cars
    * @param {*} req
    * @param {*} res
    */
   controller.delete = (req, res) => {
-    const _id = sanitize(req.params.id);
-    console.log(typeof _id, typeof `${req.user._id}`);
-
-    if (_id !== `${req.user._id}`) {
-      return res.status(401).end();
-    }
+    const { _id } = req.user;
 
     User.findByIdAndDelete(_id).exec((error) => {
       if (error) {
