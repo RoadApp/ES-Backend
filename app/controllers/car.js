@@ -1,4 +1,5 @@
 const sanitize = require('mongo-sanitize');
+const validator = require('validator');
 
 module.exports = (app) => {
   const Car = app.models.car;
@@ -6,6 +7,26 @@ module.exports = (app) => {
   const controller = {};
 
   const CAR_PROJECTION = 'owner brand model year plate';
+
+  const validateCar = (updating, {
+    brand, plate, model, year
+  }) => {
+    let isValid = true;
+    isValid =
+      brand && isValid
+        ? !validator.isEmpty(brand.trim())
+        : isValid && updating;
+    isValid =
+      plate && isValid
+        ? plate.length === 8 && validator.matches(plate, /[a-zA-Z]{3}-[\d]{4}/)
+        : isValid && updating;
+    isValid =
+      model && isValid
+        ? !validator.isEmpty(model.trim())
+        : isValid && updating;
+    isValid = year && isValid ? year.length === 4 : isValid && updating;
+    return isValid;
+  };
 
   // Display all cars on GET.
   controller.list = (req, res) => {
@@ -39,6 +60,18 @@ module.exports = (app) => {
     const {
       brand, model, year, plate
     } = req.body;
+
+    if (
+      !validateCar(false, {
+        brand,
+        model,
+        year,
+        plate
+      })
+    ) {
+      return res.status(500).json(new Error('Invalid car.'));
+    }
+
     const newCar = new Car({
       owner,
       brand,
@@ -59,12 +92,15 @@ module.exports = (app) => {
   // Display car update form on PUT.
   controller.update = (req, res) => {
     const owner = req.user._id;
-    const data = {
-      brand: req.body.brand,
-      model: req.body.model,
-      year: req.body.year,
-      plate: req.body.plate
-    };
+    const data = {};
+    if (req.body.brand) data.brand = req.body.brand;
+    if (req.body.model) data.model = req.body.model;
+    if (req.body.year) data.year = req.body.year;
+    if (req.body.plate) data.plate = req.body.plate;
+
+    if (!validateCar(true, data)) {
+      return res.status(500).json(new Error('Invalid car.'));
+    }
 
     const _id = sanitize(req.params.id);
 
