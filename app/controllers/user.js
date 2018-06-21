@@ -1,4 +1,5 @@
 const sanitize = require('mongo-sanitize');
+const validator = require('validator');
 
 module.exports = (app) => {
   const User = app.models.user;
@@ -21,6 +22,23 @@ module.exports = (app) => {
     };
 
     return userReturn;
+  };
+
+  /**
+   * Check if an user (or its props) is valid or not.
+   * @param {boolean} updating if it's updating or not; if not, email
+   * and password are ignored
+   * @param {object} user object that contains fullName, email and/or password
+   */
+  const validateUser = (updating, { fullName, email, password }) => {
+    // console.log(validator.isEmail(email));
+    let isValid = true;
+    isValid = fullName && isValid ? fullName.length >= 5 : updating;
+    if (!updating) {
+      isValid = email && isValid ? validator.isEmail(email) : false;
+      isValid = password && isValid ? password.trim().length >= 6 : false;
+    }
+    return isValid;
   };
 
   /**
@@ -71,10 +89,14 @@ module.exports = (app) => {
    * @return {Object} user
    */
   controller.add = (req, res) => {
+    const { fullName, email, password } = req.body;
+    if (!validateUser(false, { fullName, email, password })) {
+      return res.status(500).json(new Error('User invalid'));
+    }
     const newUser = new User();
-    newUser.fullName = req.body.fullName;
-    newUser.email = req.body.email;
-    newUser.password = newUser.generateHash(req.body.password);
+    newUser.fullName = fullName;
+    newUser.email = email;
+    newUser.password = newUser.generateHash(password);
     newUser.save((error, user) => {
       if (error) {
         console.log(`error: ${error}`);
@@ -102,9 +124,13 @@ module.exports = (app) => {
     const data = {};
     data.fullName = req.body.fullName;
 
+    if (!validateUser(true, data)) {
+      return res.status(500).json(new Error('User invalid'));
+    }
+
     const _id = sanitize(req.params.id);
 
-    if (_id !== req.user._id) {
+    if (_id !== `${req.user._id}`) {
       return res.status(403).end();
     }
 
@@ -129,7 +155,6 @@ module.exports = (app) => {
     console.log(typeof _id, typeof `${req.user._id}`);
 
     if (_id !== `${req.user._id}`) {
-      console.log('oi');
       return res.status(401).end();
     }
 
