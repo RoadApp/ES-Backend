@@ -2,6 +2,7 @@ const sanitize = require('mongo-sanitize');
 
 module.exports = (app) => {
   const User = app.models.user;
+  const Car = app.models.car;
 
   const controller = {};
 
@@ -49,6 +50,9 @@ module.exports = (app) => {
    */
   controller.get = (req, res) => {
     const _id = sanitize(req.params.id);
+    if (_id !== req.user._id) {
+      return res.status(403).end();
+    }
     User.findOne({ _id })
       .lean(true)
       .exec((error, user) => {
@@ -100,6 +104,10 @@ module.exports = (app) => {
 
     const _id = sanitize(req.params.id);
 
+    if (_id !== req.user._id) {
+      return res.status(403).end();
+    }
+
     User.findOneAndUpdate({ _id }, data, { new: true })
       .lean(true)
       .exec((error, user) => {
@@ -118,13 +126,25 @@ module.exports = (app) => {
    */
   controller.delete = (req, res) => {
     const _id = sanitize(req.params.id);
+    console.log(typeof _id, typeof `${req.user._id}`);
+
+    if (_id !== `${req.user._id}`) {
+      console.log('oi');
+      return res.status(401).end();
+    }
 
     User.findByIdAndDelete(_id).exec((error) => {
       if (error) {
         console.log(`error: ${error}`);
         return res.status(500).json(error);
       }
-      return res.status(200).end();
+      Car.deleteMany({ owner: _id })
+        .exec()
+        .then(() => res.status(200).end())
+        .catch((err) => {
+          console.log(`error: ${err}`);
+          return res.status(500).json(err);
+        });
     });
   };
 
