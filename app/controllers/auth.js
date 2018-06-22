@@ -53,13 +53,13 @@ module.exports = (app) => {
    * @param {*} res
    */
   controller.logout = (req, res) => {
-    const { _id } = req.user;
+    const _id = req.id;
     User.findByIdAndUpdate(_id, { token: null }, (error) => {
       if (error) {
         console.log('Error:', error);
         return res.status(500).json(error);
       }
-      return res.status(200).json('Logout!');
+      return res.status(200).json({ message: 'Logout!' });
     });
   };
 
