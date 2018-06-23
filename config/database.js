@@ -13,6 +13,8 @@ module.exports = (uri) => {
             if (!user) {
               const newUser = new User();
               newUser.fullName = 'Admin Example';
+              newUser.birthDate = new Date('1997-01-01');
+              newUser.cnhExpiration = new Date('2019-01-01');
               newUser.email = 'admin@email.com';
               newUser.password = newUser.generateHash('eutenhoumviolaorosa');
               newUser.save((error) => {

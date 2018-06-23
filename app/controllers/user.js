@@ -1,11 +1,13 @@
-// const sanitize = require('mongo-sanitize');
 const validator = require('validator');
+const moment = require('moment');
 
 module.exports = (app) => {
   const User = app.models.user;
   const Car = app.models.car;
 
   const controller = {};
+
+  const USER_PROJECTION = '_id email fullName birthDate cnhExpiration token';
 
   /**
    * Make an user object without unnecessary properties (e.g. mongo attributes)
@@ -17,8 +19,9 @@ module.exports = (app) => {
       _id: user._id,
       email: user.email,
       fullName: user.fullName,
-      token: user.token,
-      cars: user.cars
+      birthDate: user.birthDate,
+      cnhExpiration: user.cnhExpiration,
+      token: user.token
     };
 
     return userReturn;
@@ -30,13 +33,27 @@ module.exports = (app) => {
    * and password are ignored
    * @param {object} user object that contains fullName, email and/or password
    */
-  const validateUser = (updating, { fullName, email, password }) => {
-    let isValid = true;
-    isValid = fullName && isValid ? fullName.length >= 5 : updating;
-    if (!updating) {
-      isValid = email && isValid ? validator.isEmail(email) : false;
-      isValid = password && isValid ? password.trim().length >= 6 : false;
+  const validateUser = (
+    updating,
+    {
+      fullName, birthDate, cnhExpiration, email, password
     }
+  ) => {
+    let isValid = true;
+    isValid = fullName && isValid ? fullName.length >= 5 : isValid && updating;
+    isValid =
+      birthDate && isValid
+        ? moment(birthDate).isValid() &&
+          moment().diff(moment(birthDate), 'years') >= 18
+        : isValid && updating;
+    isValid =
+      cnhExpiration && isValid
+        ? moment(cnhExpiration).isValid() &&
+          moment(cnhExpiration).diff(moment(), 'days') > 0
+        : isValid && updating;
+    isValid = email && isValid ? validator.isEmail(email) : isValid && updating;
+    isValid =
+      password && isValid ? password.trim().length >= 6 : isValid && updating;
     return isValid;
   };
 
@@ -47,7 +64,7 @@ module.exports = (app) => {
    * @return {Array} users
    */
   controller.list = (req, res) => {
-    User.find({}, 'fullName email cars')
+    User.find({}, USER_PROJECTION)
       .sort({ fullName: 1 })
       .lean(true)
       .exec((error, users) => {
@@ -67,14 +84,14 @@ module.exports = (app) => {
    */
   controller.get = (req, res) => {
     const { _id } = req.user;
-    User.findOne({ _id })
+    User.findOne({ _id }, USER_PROJECTION)
       .lean(true)
       .exec((error, user) => {
         if (error) {
           console.log(`error: ${error}`);
           return res.status(500).json(error);
         }
-        return res.status(200).json(makeReturnedUser(user));
+        return res.status(200).json(user);
       });
   };
 
@@ -85,12 +102,24 @@ module.exports = (app) => {
    * @return {Object} user
    */
   controller.add = (req, res) => {
-    const { fullName, email, password } = req.body;
-    if (!validateUser(false, { fullName, email, password })) {
+    const {
+      fullName, cnhExpiration, birthDate, email, password
+    } = req.body;
+    if (
+      !validateUser(false, {
+        fullName,
+        cnhExpiration,
+        birthDate,
+        email,
+        password
+      })
+    ) {
       return res.status(500).json(new Error('User invalid'));
     }
     const newUser = new User();
     newUser.fullName = fullName;
+    newUser.cnhExpiration = cnhExpiration;
+    newUser.birthDate = birthDate;
     newUser.email = email;
     newUser.password = newUser.generateHash(password);
     newUser.save((error, user) => {
@@ -117,8 +146,11 @@ module.exports = (app) => {
    * @return {Object} user updated
    */
   controller.update = (req, res) => {
+    const { fullName, cnhExpiration, birthDate } = req.body;
     const data = {};
-    data.fullName = req.body.fullName;
+    if (fullName) data.fullName = fullName;
+    if (cnhExpiration) data.cnhExpiration = cnhExpiration;
+    if (birthDate) data.birthDate = birthDate;
 
     if (!validateUser(true, data)) {
       return res.status(500).json(new Error('User invalid'));
