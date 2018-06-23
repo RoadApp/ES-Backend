@@ -53,7 +53,7 @@ module.exports = (app) => {
    * @param {*} res
    */
   controller.logout = (req, res) => {
-    const _id = req.id;
+    const { _id } = req.user;
     User.findByIdAndUpdate(_id, { token: null }, (error) => {
       if (error) {
         console.log('Error:', error);
