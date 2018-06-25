@@ -27,6 +27,11 @@ const CarSchema = mongoose.Schema({
     type: String,
     required: true,
     unique: true
+  },
+  odometer: {
+    type: Number,
+    required: true,
+    default: 0
   }
 });
 

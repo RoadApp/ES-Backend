@@ -6,25 +6,22 @@ module.exports = (app) => {
 
   const controller = {};
 
-  const CAR_PROJECTION = 'owner brand model year plate';
+  const CAR_PROJECTION = 'owner brand model year plate, odometer';
 
   const validateCar = (updating, {
-    brand, plate, model, year
+    brand, plate, model, year, odometer
   }) => {
     let isValid = true;
     isValid =
-      brand && isValid
-        ? !validator.isEmpty(brand.trim())
-        : isValid && updating;
+      brand && isValid ? !validator.isEmpty(brand.trim()) : isValid && updating;
     isValid =
       plate && isValid
         ? plate.length === 8 && validator.matches(plate, /[a-zA-Z]{3}-[\d]{4}/)
         : isValid && updating;
     isValid =
-      model && isValid
-        ? !validator.isEmpty(model.trim())
-        : isValid && updating;
+      model && isValid ? !validator.isEmpty(model.trim()) : isValid && updating;
     isValid = year && isValid ? year.length === 4 : isValid && updating;
+    isValid = odometer != null && isValid ? odometer >= 0 : isValid && updating;
     return isValid;
   };
 
@@ -58,7 +55,7 @@ module.exports = (app) => {
   controller.add = (req, res) => {
     const owner = req.user._id;
     const {
-      brand, model, year, plate
+      brand, model, year, plate, odometer
     } = req.body;
 
     if (
@@ -66,7 +63,8 @@ module.exports = (app) => {
         brand,
         model,
         year,
-        plate
+        plate,
+        odometer
       })
     ) {
       return res.status(500).json(new Error('Invalid car.'));
@@ -77,7 +75,8 @@ module.exports = (app) => {
       brand,
       model,
       year,
-      plate
+      plate,
+      odometer
     });
 
     newCar
@@ -97,6 +96,7 @@ module.exports = (app) => {
     if (req.body.model) data.model = req.body.model;
     if (req.body.year) data.year = req.body.year;
     if (req.body.plate) data.plate = req.body.plate;
+    if (req.body.odometer) data.odometer = req.body.odometer;
 
     if (!validateCar(true, data)) {
       return res.status(500).json(new Error('Invalid car.'));
