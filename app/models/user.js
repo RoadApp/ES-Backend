@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt-nodejs');
 
+const Car = require('./car');
+
 const UserSchema = mongoose.Schema({
   createdAt: {
     type: Date,
@@ -35,6 +37,13 @@ const UserSchema = mongoose.Schema({
     type: String,
     trim: true
   }
+});
+
+// eslint-disable-next-line func-names
+UserSchema.post('remove', async function (next) {
+  const cars = await Car.find({ owner: this._id });
+  cars.forEach((car) => car.remove());
+  next();
 });
 
 /**

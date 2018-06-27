@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 
+const Service = require('./service');
+const Mileage = require('./mileage');
+
 const CarSchema = mongoose.Schema({
   createdAt: {
     type: Date,
@@ -33,6 +36,15 @@ const CarSchema = mongoose.Schema({
     required: true,
     default: 0
   }
+});
+
+// eslint-disable-next-line func-names
+CarSchema.post('remove', async (next) => {
+  const services = await Service.find({ car: this._id });
+  const mileages = await Mileage.find({ car: this._id });
+  services.forEach(async (service) => service.remove());
+  mileages.forEach(async (mileage) => mileage.remove());
+  next();
 });
 
 module.exports = () => mongoose.model('Car', CarSchema);
