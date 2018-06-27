@@ -7,9 +7,9 @@ module.exports = (app) => {
     .post(permissionUtils.isLoggedIn, controller.add)
     .get(permissionUtils.isLoggedIn, controller.list);
 
-  // app
-  //   .route('/service/:id')
-  //   .get(permissionUtils.isLoggedIn, controller.get)
-  //   .put(permissionUtils.isLoggedIn, controller.update)
-  //   .delete(permissionUtils.isLoggedIn, controller.delete);
+  app
+    .route('/service/:id')
+    .get(permissionUtils.isLoggedIn, controller.get)
+    .put(permissionUtils.isLoggedIn, controller.update)
+    .delete(permissionUtils.isLoggedIn, controller.delete);
 };
