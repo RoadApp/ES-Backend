@@ -1,11 +1,6 @@
 const mongoose = require('mongoose');
 
 const ServiceSchema = mongoose.Schema({
-  createdAt: {
-    type: Date,
-    required: true,
-    default: Date.now
-  },
   madeAt: {
     type: Date,
     required: true,
