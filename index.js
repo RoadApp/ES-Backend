@@ -1,7 +1,10 @@
 const http = require('http');
 const app = require('./config/express')();
+
+const mongoUri = process.env.MONGODB_URI;
+
 require('./config/passport')();
-require('./config/database')('mongodb://localhost/road');
+require('./config/database')(mongoUri || 'mongodb://localhost/road');
 
 const port = app.get('port');
 
