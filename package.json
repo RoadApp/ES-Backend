@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "eslint .",
     "dev": "nodemon index.js --exec \"npm run lint && node\" ",
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
@@ -28,6 +29,7 @@
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.11.0",
+    "jest": "^23.2.0",
     "nodemon": "^1.17.4"
   }
 }
