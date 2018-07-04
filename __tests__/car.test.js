@@ -1,38 +1,75 @@
-const app = require('./config/express')();
+const app = require('../config/express')();
+const mongoose = require('mongoose');
+const request = require('supertest');
+
+let token = "";
 
 beforeAll(() => {
-    require('./config/passport')();
-    require('./config/database')('mongodb://localhost/road');
+    let mongoUri = process.env.MONGODB_URI;
+
+    require('../config/passport')();
+    require('../config/database')(mongoUri || 'mongodb://localhost/road');
+
+    // TO DO LOGIN & token UPDATE
+    // token = something
+
 });
 
+afterAll((done) => {
+    mongoose.disconnect(done);
+});
+
+
 describe('POST /car - create new car', () => {
-    let user = {
+
+    const user = {
+        _id: "test",
         createdAt: Date.now,
         fullName: "John Doe",
-        birthDate: new Date(1997, 03, 03),
-        cnhExpiration: new Date(2020, 03, 03),
+        birthDate: new Date(1997, 3, 3),
+        cnhExpiration: new Date(2020, 3, 3),
         email: "john@mail.com",
         password: "john123"
-    }
-    let car = {
-        createdAt: Date.now,
-        owner: user,
-        brand: "Volkswagen",
-        model: "Gol",
-        year: "2018",
-        plate: "XXX-9999",
-        odometer: 0
     };
-    it('should accept and add a valid new item', () => {
-      return request(app).post('/car')
-      .send(car)
-      .then((res) => {
-        expect(res.body.status).toBe(200);
-        expect(res.body.message).toBe('Success!');
-        return request(app).get('/car');
-      })
+
+    const car = {
+        user: user,
+        body: {
+            createdAt: Date.now,
+            brand: "Volkswagen",
+            model: "Gol",
+            year: "2018",
+            plate: "XXX-9999",
+            odometer: 0
+        }       
+    };
+
+    const carId = "";
+
+    test('should accept and add a valid new item', async () => {
+        const addedCar = await request(app)
+            .post("/car")
+            .send(car)
+            .then((res) => {
+                expect(res.statusCode).toBe(200);
+            });
+        carId = addedCar._id;            
     });
-    it('should reject post without owner, brand, or plate', () => {
+    
+    test('should recover the added car', async () => {
+        const response = request(app).get("/car/" + carId);
+        expect(response.plate).toBe("XXX-9999")
+            
+    });
+    
+    test('should delete the car', async () => {
+        await request(app).delete("/car/" + carId);
+        const response = request(app).get("/car");
+        expect(response).toBe({});
+            
+    });
+ 
+    test('should reject post without owner, brand, or plate', () => {
       let badItems = [
         {
             createdAt: Date.now,
@@ -63,8 +100,8 @@ describe('POST /car - create new car', () => {
         return request(app).post('/car')
         .send(badItem)
         .then((res) => {
-          expect(res.body.status).toBe(400);
-          expect(res.body.message.startsWith('Bad Request')).toBe(true);
+          expect(res.statusCode).toBe(400);
+          expect(res.statusMessage.startsWith('Bad Request')).toBe(true);
         });
       }));
     });
