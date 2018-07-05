@@ -20,7 +20,7 @@ afterAll((done) => {
 });
 
 
-describe('POST /car - create new car', () => {
+describe('CRUD /car/:id', () => {
 
     const user = {
         _id: "test",
@@ -40,7 +40,18 @@ describe('POST /car - create new car', () => {
             model: "Gol",
             year: "2018",
             plate: "XXX-9999",
-            odometer: 0
+            odometer: 10000
+        }       
+    };
+
+    const car2 = {
+        user: user,
+        body: {
+            createdAt: Date.now,
+            brand: "Ford",
+            model: "Focus",
+            year: "2018",
+            plate: "XXX-0000",
         }       
     };
 
@@ -55,10 +66,41 @@ describe('POST /car - create new car', () => {
             });
         carId = addedCar._id;            
     });
+
+    test('verify default odometer value', async () => {
+        const addedCar = await request(app)
+            .post("/car")
+            .send(car2)
+            .then((res) => {
+                expect(res.statusCode).toBe(200);
+            });
+        expect(addedCar.odometer).toBe(0);            
+    });
     
-    test('should recover the added car', async () => {
+    test('should recover the first added car', async () => {
         const response = request(app).get("/car/" + carId);
-        expect(response.plate).toBe("XXX-9999")
+        expect(response.plate).toBe(car.body.plate)
+            
+    });
+
+    test('should list the added cars', async () => {
+        const response = request(app).get("/car");
+        expect(response).toHaveLength(2);
+            
+    });
+
+    test('should update the first added car', async () => {
+        const carU = {
+            user: user,
+            body: { plate: "XXX-8888" }
+        };
+        const updatedCar = await request(app)
+            .put("/car" + carId)
+            .send(carU)
+            .then((res) => {
+                expect(res.statusCode).toBe(200);
+            });
+        expect(updatedCar.plate).toBe(carU.body.plate);
             
     });
     
