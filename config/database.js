@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 module.exports = (uri) => {
-  mongoose.connect(uri);
+  const myDB = mongoose.connect(uri);
 
   const firstUser = () => {
     const User = mongoose.model('User');
@@ -52,4 +52,6 @@ module.exports = (uri) => {
       process.exit(0);
     });
   });
+
+  return myDB;
 };
