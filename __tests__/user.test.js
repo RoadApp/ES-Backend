@@ -10,8 +10,14 @@ beforeAll(() => {
     require('../config/passport')();
     require('../config/database')(mongoUri || 'mongodb://localhost/road');
 
-    // TO DO LOGIN & token UPDATE
-    // token = something
+    const response = request(app)
+      .post('/login')
+      .send({
+        email: 'admin@email.com',
+        password: 'eutenhoumviolaorosa'
+      });
+    const user = response.body;
+    token = user.token;
 
 });
 
@@ -45,6 +51,7 @@ describe('CRUD /user/:id', () => {
     test('should accept and add a valid new user', async () => {
         await request(app)
             .post("/user")
+            .set('Authorization', `bearer ${token}`)
             .send(user1)
             .then((res) => {
                 expect(res.statusCode).toBe(200);
@@ -52,13 +59,17 @@ describe('CRUD /user/:id', () => {
     });
 
     test('should recover the first added user', async () => {
-        const response = await request(app).get("/user/" + user1._id);
+        const response = await request(app)
+            .get("/user/" + user1._id)
+            .set('Authorization', `bearer ${token}`);
         expect(response.fullName).toBe(user1.fullName)
             
     });
 
     test('should list the added users', async () => {
-        const response = await request(app).get("/car");
+        const response = await request(app)
+            .get("/car")
+            .set('Authorization', `bearer ${token}`);
         expect(response).toHaveLength(2);
             
     });
@@ -69,6 +80,7 @@ describe('CRUD /user/:id', () => {
         };
         const updatedCar = await request(app)
             .put("/user/" + user1._id)
+            .set('Authorization', `bearer ${token}`)
             .send(userU)
             .then((res) => {
                 expect(res.statusCode).toBe(200);
@@ -114,10 +126,12 @@ describe('CRUD /user/:id', () => {
         }
       ];
       return Promise.all(badItems.map(badItem => {
-        return request(app).post('/user')
+        return request(app)
+        .post('/user')
+        .set('Authorization', `bearer ${token}`)
         .send(badItem)
         .then((res) => {
-          expect(res.statusCode).toBe(400);
+          expect(res.statusCode).toBe(401);
           expect(res.statusMessage.startsWith('Bad Request')).toBe(true);
         });
       }));

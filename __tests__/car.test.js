@@ -10,8 +10,15 @@ beforeAll(() => {
     require('../config/passport')();
     require('../config/database')(mongoUri || 'mongodb://localhost/road');
 
-    // TO DO LOGIN & token UPDATE
-    // token = something
+    const response = request(app)
+      .post('/login')
+      .send({
+        email: 'admin@email.com',
+        password: 'eutenhoumviolaorosa'
+      });
+    const user = response.body;
+    console.log(response.body);
+    token = user.token;
 
 });
 
@@ -60,6 +67,7 @@ describe('CRUD /car/:id', () => {
     test('should accept and add a valid new item', async () => {
         const addedCar = await request(app)
             .post("/car")
+            .set('Authorization', `bearer ${token}`)
             .send(car)
             .then((res) => {
                 expect(res.statusCode).toBe(200);
@@ -70,6 +78,7 @@ describe('CRUD /car/:id', () => {
     test('verify default odometer value', async () => {
         const addedCar = await request(app)
             .post("/car")
+            .set('Authorization', `bearer ${token}`)
             .send(car2)
             .then((res) => {
                 expect(res.statusCode).toBe(200);
@@ -78,13 +87,17 @@ describe('CRUD /car/:id', () => {
     });
     
     test('should recover the first added car', async () => {
-        const response = request(app).get("/car/" + carId);
+        const response = request(app)
+            .get("/car/" + carId)
+            .set('Authorization', `bearer ${token}`);
         expect(response.plate).toBe(car.body.plate)
             
     });
 
     test('should list the added cars', async () => {
-        const response = request(app).get("/car");
+        const response = request(app)
+            .get("/car")
+            .set('Authorization', `bearer ${token}`);
         expect(response).toHaveLength(2);
             
     });
@@ -96,6 +109,7 @@ describe('CRUD /car/:id', () => {
         };
         const updatedCar = await request(app)
             .put("/car" + carId)
+            .set('Authorization', `bearer ${token}`)
             .send(carU)
             .then((res) => {
                 expect(res.statusCode).toBe(200);
@@ -105,7 +119,9 @@ describe('CRUD /car/:id', () => {
     });
     
     test('should delete the car', async () => {
-        await request(app).delete("/car/" + carId);
+        await request(app)
+            .delete("/car/" + carId)
+            .set('Authorization', `bearer ${token}`);
         const response = request(app).get("/car");
         expect(response).toBe({});
             
@@ -139,12 +155,14 @@ describe('CRUD /car/:id', () => {
         }
       ];
       return Promise.all(badItems.map(badItem => {
-        return request(app).post('/car')
-        .send(badItem)
-        .then((res) => {
-          expect(res.statusCode).toBe(400);
-          expect(res.statusMessage.startsWith('Bad Request')).toBe(true);
-        });
+        return request(app)
+            .post('/car')
+            .set('Authorization', `bearer ${token}`)
+            .send(badItem)
+            .then((res) => {
+                expect(res.statusCode).toBe(401);
+                expect(res.statusMessage.startsWith('Bad Request')).toBe(true);
+            });
       }));
     });
 });
