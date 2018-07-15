@@ -33,7 +33,7 @@ const CarSchema = mongoose.Schema({
   },
   odometer: {
     type: Number,
-    required: true,
+    required: false,
     default: 0
   }
 });
