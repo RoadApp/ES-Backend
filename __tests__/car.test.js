@@ -24,8 +24,6 @@ beforeAll(async () => {
 });
 
 afterAll((done) => {
-    //mongoose.connection.db.dropDatabase(done);
-    Car.remove({});
     mongoose.disconnect(done);
 });
 
