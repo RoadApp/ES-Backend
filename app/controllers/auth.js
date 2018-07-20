@@ -29,7 +29,6 @@ module.exports = (app) => {
             const {
               _id, fullName, email, token, cars
             } = result;
-            console.log(result);
             return res.status(200).json({
               _id,
               fullName,

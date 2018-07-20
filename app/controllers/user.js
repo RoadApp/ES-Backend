@@ -135,7 +135,7 @@ module.exports = (app) => {
         return res.status(500).json(errorToReturn);
       }
 
-      return res.status(201).json(makeReturnedUser(user));
+      return res.status(200).json(makeReturnedUser(user));
     });
   };
 

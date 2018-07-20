@@ -5,6 +5,10 @@ const app = require('../config/express')();
 const passport = require('../config/passport');
 const mongo = require('../config/database');
 
+const {
+  models: { car: Car }
+} = app;
+
 describe('CRUD /car/:id', () => {
   let token;
 
@@ -20,11 +24,15 @@ describe('CRUD /car/:id', () => {
         password: 'eutenhoumviolaorosa'
       });
     token = response.body.token; // eslint-disable-line
-    mongoose.connection.collections.cars.drop();
+    await Car.remove({}).exec();
   });
 
   afterAll((done) => {
-    mongoose.disconnect(done);
+    Car.remove({})
+      .exec()
+      .then(() => {
+        mongoose.disconnect(done);
+      });
   });
 
   const car = {
