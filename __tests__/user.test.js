@@ -4,20 +4,23 @@ const request = require('supertest');
 
 let token = "";
 
-beforeAll(() => {
+beforeAll(async () => {
+    
+    //mongoose.connection.collections["users"].drop();
+
     let mongoUri = process.env.MONGODB_URI;
 
     require('../config/passport')();
     require('../config/database')(mongoUri || 'mongodb://localhost/road');
 
-    const response = request(app)
+    const response = await request(app)
       .post('/login')
       .send({
         email: 'admin@email.com',
         password: 'eutenhoumviolaorosa'
       });
     const user = response.body;
-    token = user.token;
+    token = user.token;    
 
 });
 
@@ -49,13 +52,11 @@ describe('CRUD /user/:id', () => {
     };
 
     test('should accept and add a valid new user', async () => {
-        await request(app)
+        const response = await request(app)
             .post("/user")
             .set('Authorization', `bearer ${token}`)
-            .send(user1)
-            .then((res) => {
-                expect(res.statusCode).toBe(200);
-            });
+            .send(user1);
+        expect(response.statusCode).toBe(200);
     });
 
     test('should recover the first added user', async () => {
@@ -131,7 +132,7 @@ describe('CRUD /user/:id', () => {
         .set('Authorization', `bearer ${token}`)
         .send(badItem)
         .then((res) => {
-          expect(res.statusCode).toBe(401);
+          expect(res.statusCode).toBe(500);
           expect(res.statusMessage.startsWith('Bad Request')).toBe(true);
         });
       }));

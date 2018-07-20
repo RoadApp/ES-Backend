@@ -1,21 +1,20 @@
 const request = require('supertest');
-
 const app = require('../config/express')();
 const passport = require('../config/passport');
 const mongo = require('../config/database');
-
-let db;
+const mongoose = require('mongoose');
 
 describe('auth', () => {
   let token;
 
   beforeAll(() => {
+    let mongoUri = process.env.MONGODB_URI;
     passport();
-    db = mongo(process.env.MONGODB_URI || 'mongodb://localhost/road');
+    mongo(mongoUri || 'mongodb://localhost/road');
   });
 
   afterAll((done) => {
-    db.disconnect(done);
+    mongoose.disconnect(done);
   });
 
   test('Test login with valid credentials', async () => {
