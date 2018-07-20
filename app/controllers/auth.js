@@ -16,11 +16,12 @@ module.exports = (app) => {
       .exec()
       .then((user) => {
         if (!user) {
-          return res.status(401).end();
+          return res.status(400).end();
         }
 
         if (!user.verifyPassword(req.body.password)) {
-          return res.status(401).end();
+          console.log(user);
+          return res.status(400).end();
         }
 
         User.findByIdAndUpdate(user._id, { token: uuid.v4() }, { new: true })
@@ -29,6 +30,7 @@ module.exports = (app) => {
             const {
               _id, fullName, email, token, cars
             } = result;
+            console.log(result);
             return res.status(200).json({
               _id,
               fullName,
