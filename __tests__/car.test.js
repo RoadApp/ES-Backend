@@ -5,27 +5,28 @@ const Car = app.models.car;
 
 let token = "";
 
-beforeAll(async () => {
+beforeAll(() => {
     let mongoUri = process.env.MONGODB_URI;
 
     require('../config/passport')();
     require('../config/database')(mongoUri || 'mongodb://localhost/road');
 
-    const response = await request(app)
+    request(app)
       .post('/login')
       .send({
         email: 'admin@email.com',
         password: 'eutenhoumviolaorosa'
+      })
+      .then((res) => {
+          token = res.body.token;
       });
-    const user = response.body;
-    token = user.token;
+      
+    console.log(token);
 
     mongoose.connection.collections["cars"].drop();
 });
 
 afterAll((done) => {
-    //mongoose.connection.db.dropDatabase(done);
-    Car.remove({});
     mongoose.disconnect(done);
 });
 
@@ -67,12 +68,12 @@ describe('CRUD /car/:id', () => {
     test('should accept and add a valid new car', async () => {
         const response = await request(app)
             .post("/car")
-            .set('Authorization', `bearer ${token}`)
+            .set("Authorization", "bearer ${token}")
             .send(car);
         
         const response2 = await request(app)
             .post("/car")
-            .set('Authorization', `bearer ${token}`)
+            .set('Authorization', 'bearer ${token}')
             .send(car2);
        
         expect(response.status).toBe(200); 
@@ -84,7 +85,7 @@ describe('CRUD /car/:id', () => {
     test('should recover the first added car', async () => {
         const response = await request(app)
             .get("/car/" + carId)
-            .set('Authorization', `bearer ${token}`);
+            .set("Authorization", "bearer ${token}");
         expect(response.body.brand).toBe(car.brand);            
         expect(response.body.model).toBe(car.model);
         expect(response.body.year).toBe(car.year);
@@ -93,7 +94,7 @@ describe('CRUD /car/:id', () => {
     test('should list the added cars', async () => {
         const response = await request(app)
             .get("/car")
-            .set('Authorization', `bearer ${token}`);
+            .set("Authorization", "bearer ${token}");
         expect(response.body).toHaveLength(2);
             
     });
@@ -104,14 +105,14 @@ describe('CRUD /car/:id', () => {
         };
         const updatedCar = await request(app)
             .put("/car/" + carId)
-            .set('Authorization', `bearer ${token}`)
+            .set("Authorization", "bearer ${token}")
             .send(carU)
             .then((res) => {
                 expect(res.statusCode).toBe(200);
             });
         const response = await request(app)
             .get("/car/" + carId)
-            .set('Authorization', `bearer ${token}`);
+            .set("Authorization", "bearer ${token}");
         expect(response.body.model).toBe(carU.model);
             
     });
@@ -119,10 +120,10 @@ describe('CRUD /car/:id', () => {
     test('should delete the car', async () => {
         await request(app)
             .delete("/car/" + carId)
-            .set('Authorization', `bearer ${token}`);   
+            .set("Authorization", "bearer ${token}"); 
         const response = await request(app)
             .get("/car")
-            .set('Authorization', `bearer ${token}`);
+            .set("Authorization", "bearer ${token}");
         expect(response.status).toBe(200);
         expect(response.body).not.toContain(car);
             
@@ -155,7 +156,7 @@ describe('CRUD /car/:id', () => {
       return Promise.all(badItems.map(badItem => {
         return request(app)
             .post('/car')
-            .set('Authorization', `bearer ${token}`)
+            .set("Authorization", "bearer ${token}")
             .send(badItem)
             .then((res) => {
                 expect(res.statusCode).toBe(500);

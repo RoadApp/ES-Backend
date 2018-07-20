@@ -14,7 +14,6 @@ describe('auth', () => {
   });
 
   afterAll((done) => {
-    //mongoose.connection.db.dropDatabase(done);
     mongoose.disconnect(done);
   });
 
