@@ -4,6 +4,9 @@ module.exports = (uri) => {
   const myDB = mongoose.connect(uri);
 
   const firstUser = async () => {
+    if (process.env.NODE_ENV === 'test') {
+      return;
+    }
     const User = mongoose.model('User');
     try {
       const users = await User.find().exec();

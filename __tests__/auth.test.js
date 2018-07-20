@@ -1,20 +1,39 @@
 const request = require('supertest');
+const mongoose = require('mongoose');
+
 const app = require('../config/express')();
 const passport = require('../config/passport');
 const mongo = require('../config/database');
-const mongoose = require('mongoose');
+
+const {
+  models: { user: User }
+} = app;
 
 describe('auth', () => {
   let token;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     const mongoUri = process.env.MONGODB_URI;
     passport();
     mongo(mongoUri || 'mongodb://localhost/road');
+    await User.remove({}).exec();
+    await request(app)
+      .post('/user')
+      .send({
+        fullName: 'Admin Example',
+        birthDate: new Date(1997, 3, 3),
+        cnhExpiration: new Date(2020, 3, 3),
+        email: 'admin@email.com',
+        password: 'eutenhoumviolaorosa'
+      });
   });
 
   afterAll((done) => {
-    mongoose.disconnect(done);
+    User.remove({})
+      .exec()
+      .then(() => {
+        mongoose.disconnect(done);
+      });
   });
 
   test('Test login with valid credentials', async () => {

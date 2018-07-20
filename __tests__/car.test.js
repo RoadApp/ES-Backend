@@ -16,7 +16,15 @@ describe('CRUD /car/:id', () => {
     const mongoUri = process.env.MONGODB_URI;
     passport();
     mongo(mongoUri || 'mongodb://localhost/road');
-
+    await request(app)
+      .post('/user')
+      .send({
+        fullName: 'Admin Example',
+        birthDate: new Date(1997, 3, 3),
+        cnhExpiration: new Date(2020, 3, 3),
+        email: 'admin@email.com',
+        password: 'eutenhoumviolaorosa'
+      });
     const response = await request(app)
       .post('/login')
       .send({

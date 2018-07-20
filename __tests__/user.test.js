@@ -79,7 +79,7 @@ describe('CRUD /user/:id', () => {
 
   test('should list the added users', async () => {
     const users = await User.find({}).exec();
-    expect(users).toHaveLength(3);
+    expect(users).toHaveLength(2);
   });
 
   test('should update the first added user', async () => {
@@ -106,7 +106,7 @@ describe('CRUD /user/:id', () => {
       .set('Authorization', `bearer ${loginRes.body.token}`);
     expect(deleteRes.status).toBe(200);
     const users = await User.find({}).exec();
-    expect(users).toHaveLength(2);
+    expect(users).toHaveLength(1);
   });
 
   test(`should reject post without

@@ -6,8 +6,8 @@
   "scripts": {
     "lint": "eslint .",
     "dev": "nodemon index.js --exec \"npm run lint && node\" ",
-    "start": "node index.js",
-    "test": "jest"
+    "start": "set NODE_ENV=production && node index.js",
+    "test": "jest --runInBand"
   },
   "author": "",
   "license": "ISC",
@@ -34,5 +34,15 @@
     "eslint-plugin-jest": "^21.17.0",
     "jest": "^23.2.0",
     "nodemon": "^1.17.4"
+  },
+  "jest": {
+    "globals": {
+      "NODE_ENV": "test"
+    }
+  },
+  "nodemonConfig": {
+    "env": {
+      "NODE_ENV": "development"
+    }
   }
 }
