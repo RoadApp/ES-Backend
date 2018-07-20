@@ -8,7 +8,7 @@ describe('auth', () => {
   let token;
 
   beforeAll(() => {
-    let mongoUri = process.env.MONGODB_URI;
+    const mongoUri = process.env.MONGODB_URI;
     passport();
     mongo(mongoUri || 'mongodb://localhost/road');
   });

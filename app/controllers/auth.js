@@ -20,7 +20,6 @@ module.exports = (app) => {
         }
 
         if (!user.verifyPassword(req.body.password)) {
-          console.log(user);
           return res.status(400).end();
         }
 
