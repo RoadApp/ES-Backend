@@ -20,7 +20,6 @@ module.exports = (app) => {
         }
 
         if (!user.verifyPassword(req.body.password)) {
-          console.log(user);
           return res.status(400).end();
         }
 
@@ -30,7 +29,6 @@ module.exports = (app) => {
             const {
               _id, fullName, email, token, cars
             } = result;
-            console.log(result);
             return res.status(200).json({
               _id,
               fullName,
