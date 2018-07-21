@@ -6,7 +6,7 @@ module.exports = (app) => {
 
   const controller = {};
 
-  const CAR_PROJECTION = 'owner brand model year plate, odometer';
+  const CAR_PROJECTION = 'owner brand model year plate odometer';
 
   const validateCar = (updating, {
     brand, plate, model, year, odometer
@@ -53,6 +53,7 @@ module.exports = (app) => {
 
   // Handle car create on POST.
   controller.add = (req, res) => {
+    console.log('@@@@@@@@@@@');
     const owner = req.user._id;
     const {
       brand, model, year, plate, odometer
