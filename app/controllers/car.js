@@ -56,7 +56,6 @@ module.exports = (app) => {
 
   // Handle car create on POST.
   controller.add = (req, res) => {
-    // console.log('@@@@@@@@@@@');
     const owner = req.user._id;
     const {
       brand, model, year, plate, odometer

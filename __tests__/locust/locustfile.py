@@ -1,6 +1,8 @@
 from locust import HttpLocust, TaskSet, task
+from random import randint, choice
 import datetime
 import json
+import string
 
 class UserBehavior(TaskSet):
 
@@ -18,7 +20,6 @@ class UserBehavior(TaskSet):
         "fullName": "John Doe",
         "birthDate": str(datetime.datetime(1992, 3, 3)),
         "cnhExpiration": str(datetime.datetime(2020, 1, 1)),
-        "email": "john@mail.com",
         "password": "john123"
     }
             
@@ -28,21 +29,13 @@ class UserBehavior(TaskSet):
         "brand": "Volkswagen",
         "model": "Gol",
         "year": "2018",
-        "plate": "XXX-1999",
         "odometer": 10000
     }
 
-    car2 = {
-        "createdAt": datetime.datetime.now(),
-        "owner": user,
-        "brand": "Ford",
-        "model": "Focus",
-        "year": "2018",
-        "plate": "XXX-0000",
-        "odometer": 2       
-    }
-
     auth_header = {}
+
+    def random_string(self, length):
+        return ''.join(choice(string.ascii_letters) for m in range(length))
 
 
     def on_start(self):
@@ -68,6 +61,8 @@ class UserBehavior(TaskSet):
     
     @task(8)
     def car_register(self):
+        self.car["plate"] = "XXX-" + str(randint(1000, 9999))
+
         response = self.client.post("/car",
             data=self.car,
             headers=self.auth_header,
@@ -84,6 +79,8 @@ class UserBehavior(TaskSet):
 
     @task(3)
     def user_register(self):
+        self.user2["email"] = self.random_string(10) + "@mail.com"
+
         self.client.post("/user", self.user2)
 
         response = self.client.post("/login", {
