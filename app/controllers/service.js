@@ -4,6 +4,7 @@ const sanitize = require('mongo-sanitize');
 module.exports = (app) => {
   const Car = app.models.car;
   const Service = app.models.service;
+  const MileageController = app.controllers.mileage;
 
   const controller = {};
 
@@ -64,8 +65,22 @@ module.exports = (app) => {
           description
         });
 
-        const service = await newService.save();
-        return res.status(200).json(service);
+        const foundedCar = await Car.findOne({
+          _id: car,
+          owner: req.user._id
+        }).exec();
+        if (foundedCar.odometer <= mileage) {
+          try {
+            await MileageController.add(car, req.user._id, mileage);
+            const service = await newService.save();
+            return res.status(200).json(service);
+          } catch (error) {
+            console.log('Error:', error);
+            return res.status(500).json(error);
+          }
+        } else {
+          return res.status(500).end();
+        }
       }
       return res.status(403).end();
     } catch (error) {
@@ -80,12 +95,11 @@ module.exports = (app) => {
       const hasCar = await loggedUserHasCar(req.user._id, car);
       if (hasCar) {
         const {
-          madeAt, mileage, expense, place, description
+          madeAt, expense, place, description
         } = req.body;
 
         const data = {};
         if (madeAt) data.madeAt = madeAt;
-        if (mileage) data.mileage = mileage;
         if (expense) data.expense = expense;
         if (place) data.place = place;
         if (description) data.description = description;

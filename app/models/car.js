@@ -38,7 +38,6 @@ const CarSchema = mongoose.Schema({
   }
 });
 
-// eslint-disable-next-line func-names
 CarSchema.post('remove', async (next) => {
   const services = await Service.find({ car: this._id });
   const mileages = await Mileage.find({ car: this._id });

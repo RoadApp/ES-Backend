@@ -3,6 +3,7 @@ const validator = require('validator');
 
 module.exports = (app) => {
   const Car = app.models.car;
+  const MileageController = app.controllers.mileage;
 
   const controller = {};
 
@@ -82,7 +83,15 @@ module.exports = (app) => {
 
     newCar
       .save()
-      .then((car) => res.status(200).json(car))
+      .then(async (car) => {
+        try {
+          await MileageController.add(car._id, car.owner, odometer);
+          return res.status(200).json(car);
+        } catch (error) {
+          await Car.remove({ _id: car._id }).exec();
+          return res.status(500).json('Impossible add car. Error', error);
+        }
+      })
       .catch((error) => {
         console.log('Error:', error);
         return res.status(500).json(error);
@@ -108,7 +117,19 @@ module.exports = (app) => {
     Car.findOneAndUpdate({ _id, owner }, data, { new: true })
       .lean(true)
       .exec()
-      .then((car) => res.status(200).json(car))
+      .then(async (car) => {
+        if (req.body.odometer) {
+          try {
+            await MileageController.add(car._id, car.owner);
+            return res.status(200).json(car);
+          } catch (error) {
+            console.log('Error:', error);
+            return res.status(500).json(error);
+          }
+        } else {
+          return res.status(200).json(car);
+        }
+      })
       .catch((error) => {
         console.log('Error:', error);
         return res.status(500).json(error);
