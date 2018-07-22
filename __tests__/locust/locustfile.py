@@ -13,6 +13,14 @@ class UserBehavior(TaskSet):
         "email": "john@mail.com",
         "password": "john123"
     }
+
+    user2 = {
+        "fullName": "John Doe",
+        "birthDate": str(datetime.datetime(1992, 3, 3)),
+        "cnhExpiration": str(datetime.datetime(2020, 1, 1)),
+        "email": "john@mail.com",
+        "password": "john123"
+    }
             
     car = {
         "createdAt": datetime.datetime.now(),
@@ -49,6 +57,7 @@ class UserBehavior(TaskSet):
         token = response.json()["token"]
         self.auth_header = { "Authorization": "bearer " + token }
 
+
     # @task(2)
     # def service_list(self):
     #     self.client.get("/car", headers=auth_header)
@@ -57,25 +66,7 @@ class UserBehavior(TaskSet):
     # def service_register(self):
     #     self.client.post("/car", car, headers=auth_header)
     
-    @task(4)
-    def user_list(self):
-        self.client.get("/user", headers=self.auth_header)
-
-    @task(2)
-    def user_register(self):
-        response = self.client.post("/user",
-            data=self.user,
-            headers=self.auth_header,
-            catch_response=True)
-        if response.ok:
-            user_id = response.json()['_id']
-            self.client.delete("/user/" + user_id, headers=self.auth_header)
-    
-    @task(4)
-    def car_list(self):
-        self.client.get("/car", headers=self.auth_header)
-
-    @task(2)
+    @task(8)
     def car_register(self):
         response = self.client.post("/car",
             data=self.car,
@@ -84,8 +75,37 @@ class UserBehavior(TaskSet):
         if response.ok:
             car_id = response.json()['_id']
             self.client.delete("/car/" + car_id, headers=self.auth_header)
+        self.client.post("/logout", headers=self.auth_header)
+    
+    @task(4)
+    def user_list(self):
+        self.client.get("/user", headers=self.auth_header)
+        self.client.post("/logout", headers=self.auth_header)
+
+    @task(3)
+    def user_register(self):
+        self.client.post("/user", self.user2)
+
+        response = self.client.post("/login", {
+            "email": self.user2["email"],
+            "password": self.user2["password"]
+        }, catch_response=True)
+
+        if response.ok:
+            token = response.json()["token"]
+            auth_header = { "Authorization": "bearer " + token }
+            self.client.delete("/user", headers=auth_header)
+        
+        self.client.post("/logout", headers=self.auth_header)
+    
+    @task(5)
+    def car_list(self):
+        self.client.get("/car", headers=self.auth_header)
+        self.client.post("/logout", headers=self.auth_header)
+
+
 
 class WebsiteUser(HttpLocust):
     task_set = UserBehavior
-    min_wait = 5000/car/5b5284fc0011b21b0cfb03cd 	1 	0 	6 	6 	6 	6 	0 	0
-    max_wait = 9000DELETE 	/car/5b5284fd0011b21b0cfb03ce 	
+    min_wait = 5000
+    max_wait = 9000
