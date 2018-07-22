@@ -1,16 +1,15 @@
 const sanitize = require('mongo-sanitize');
-// const validator = require('validator');
+let MileageController = require('./mileage');
 
 module.exports = (app) => {
   const Car = app.models.car;
   const Service = app.models.service;
-  const MileageController = app.controllers.mileage;
+  MileageController = MileageController(app);
 
   const controller = {};
 
   const loggedUserHasCar = async (owner, carId) => {
     const car = await Car.findOne({ owner, _id: carId });
-    console.log(car);
     return car != null;
   };
 
@@ -71,7 +70,10 @@ module.exports = (app) => {
         }).exec();
         if (foundedCar.odometer <= mileage) {
           try {
-            await MileageController.add(car, req.user._id, mileage);
+            await MileageController.add(car, req.user._id, {
+              createdAt: madeAt,
+              kilometers: mileage
+            });
             const service = await newService.save();
             return res.status(200).json(service);
           } catch (error) {

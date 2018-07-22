@@ -9,7 +9,6 @@ module.exports = (app) => {
 
   const loggedUserHasCar = async (owner, carId) => {
     const car = await Car.findOne({ owner, _id: carId });
-    console.log(car);
     return car != null;
   };
 
@@ -30,12 +29,14 @@ module.exports = (app) => {
     }
   };
 
-  controller.add = async (car, userId, body) => {
+  controller.add = async (
+    car,
+    userId,
+    { createdAt = Date.now(), kilometers }
+  ) => {
     try {
       const hasCar = await loggedUserHasCar(userId, car);
       if (hasCar) {
-        const { createdAt, kilometers } = body;
-
         const newMileage = new Mileage({
           createdAt,
           car,

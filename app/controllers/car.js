@@ -1,9 +1,11 @@
 const sanitize = require('mongo-sanitize');
 const validator = require('validator');
+let MileageController = require('./mileage');
 
 module.exports = (app) => {
   const Car = app.models.car;
-  const MileageController = app.controllers.mileage;
+  // const MileageController = app.controllers.mileage;
+  MileageController = MileageController(app);
 
   const controller = {};
 
@@ -54,7 +56,7 @@ module.exports = (app) => {
 
   // Handle car create on POST.
   controller.add = (req, res) => {
-    console.log('@@@@@@@@@@@');
+    // console.log('@@@@@@@@@@@');
     const owner = req.user._id;
     const {
       brand, model, year, plate, odometer
@@ -85,11 +87,14 @@ module.exports = (app) => {
       .save()
       .then(async (car) => {
         try {
-          await MileageController.add(car._id, car.owner, odometer);
+          await MileageController.add(car._id, car.owner, {
+            kilometers: odometer
+          });
           return res.status(200).json(car);
         } catch (error) {
+          console.log(error);
           await Car.remove({ _id: car._id }).exec();
-          return res.status(500).json('Impossible add car. Error', error);
+          return res.status(500).json('Impossible add car.');
         }
       })
       .catch((error) => {
@@ -120,7 +125,9 @@ module.exports = (app) => {
       .then(async (car) => {
         if (req.body.odometer) {
           try {
-            await MileageController.add(car._id, car.owner);
+            await MileageController.add(car._id, car.owner, {
+              kilometers: req.body.odometer
+            });
             return res.status(200).json(car);
           } catch (error) {
             console.log('Error:', error);
