@@ -1,14 +1,14 @@
 const axios = require('../../config/axios');
 
-const appId = 'c0bb7315-a84b-460c-a75a-a2d7daef4cf0';
+const app_id = 'c0bb7315-a84b-460c-a75a-a2d7daef4cf0'; //eslint-disable-line
 
 module.exports = {
-  sendNotifications: async (data) => {
+  sendNotification: async (data) => {
     try {
-      const response = await axios.post('', { ...data, appId });
+      const response = await axios.post('', { ...data, app_id });
       return response;
     } catch (error) {
-      throw error;
+      console.log(error);
     }
   },
   templates: {
