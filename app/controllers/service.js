@@ -1,4 +1,6 @@
 const sanitize = require('mongo-sanitize');
+const validator = require('validator');
+const moment = require('moment');
 let MileageController = require('./mileage');
 
 module.exports = (app) => {
@@ -8,12 +10,31 @@ module.exports = (app) => {
 
   const controller = {};
 
+  const validateService = (
+    updating,
+    actualMileage,
+    {
+      mileage, expense, madeAt, description
+    }
+  ) => {
+    let isValid = true;
+    isValid = mileage && isValid ? mileage >= actualMileage : false || updating;
+    isValid = expense && isValid ? expense >= 0 : isValid && updating;
+    isValid =
+      madeAt && isValid
+        ? moment(madeAt).isBefore() || moment(madeAt).isSame()
+        : isValid && updating;
+    isValid =
+      description && isValid
+        ? !validator.isEmpty(description)
+        : isValid && updating;
+    return isValid;
+  };
+
   const loggedUserHasCar = async (owner, carId) => {
     const car = await Car.findOne({ owner, _id: carId });
     return car != null;
   };
-
-  // const SERVICE_PROJECTION = 'owner brand model year plate, odometer';
 
   controller.list = async (req, res) => {
     const { car } = req.query;
@@ -52,8 +73,25 @@ module.exports = (app) => {
       const hasCar = await loggedUserHasCar(req.user._id, car);
       if (hasCar) {
         const {
-          madeAt, mileage, expense, place, description
+          madeAt = Date.now(),
+          mileage,
+          expense,
+          place,
+          description
         } = req.body;
+
+        const actualMileage = (await Car.findOne({ _id: car }).exec()).odometer;
+
+        if (
+          !validateService(false, actualMileage, {
+            mileage,
+            expense,
+            madeAt,
+            description
+          })
+        ) {
+          return res.status(500).json(new Error('Service invalid'));
+        }
 
         const newService = new Service({
           madeAt,
@@ -105,6 +143,12 @@ module.exports = (app) => {
         if (expense) data.expense = expense;
         if (place) data.place = place;
         if (description) data.description = description;
+
+        const actualMileage = (await Car.findOne({ _id: car }).exec()).odometer;
+
+        if (!validateService(true, actualMileage, data)) {
+          return res.status(500).json(new Error('Service invalid'));
+        }
 
         const _id = sanitize(req.params.id);
 

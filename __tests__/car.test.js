@@ -22,7 +22,7 @@ describe('CRUD /car/:id', () => {
         fullName: 'Admin Example',
         birthDate: new Date(1997, 3, 3),
         cnhExpiration: new Date(2020, 3, 3),
-        email: 'admin@email.com',
+        email: 'admin@mail.com',
         password: 'eutenhoumviolaorosa'
       });
     const response = await request(app)
