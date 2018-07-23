@@ -7,16 +7,6 @@ import string
 class UserBehavior(TaskSet):
 
     user = {
-        "_id": "test",
-        "createdAt": datetime.datetime.now(),
-        "fullName": "John Doe",
-        "birthDate": datetime.datetime.now(),
-        "cnhExpiration": datetime.datetime.now(),
-        "email": "john@mail.com",
-        "password": "john123"
-    }
-
-    user2 = {
         "fullName": "John Doe",
         "birthDate": str(datetime.datetime(1992, 3, 3)),
         "cnhExpiration": str(datetime.datetime(2020, 1, 1)),
@@ -30,6 +20,13 @@ class UserBehavior(TaskSet):
         "model": "Gol",
         "year": "2018",
         "odometer": 10000
+    }
+
+    service = {
+        "mileage" : 45,
+        "expense": 100,
+        "madeAt": "BestPneus"
+        "description": "Oil change"
     }
 
     auth_header = {}
@@ -49,17 +46,32 @@ class UserBehavior(TaskSet):
         }, catch_response=True)
         token = response.json()["token"]
         self.auth_header = { "Authorization": "bearer " + token }
+  
+
+    @task(1)
+    def service_register(self):
+        self.car["plate"] = "XXX-" + str(randint(1000, 9999))
+
+        response = self.client.post("/car",
+            data=self.car,
+            headers=self.auth_header,
+            catch_response=True)
+        if response.ok:
+            self.client.delete("/car/" + car_id, headers=self.auth_header)
+
+            service = self.client.post("/service",
+                data=self.car,
+                headers=self.auth_header,
+                catch_response=True)
+            
+            if service.ok:
+                service_id = response.json()['_id']
+                self.client.delete("/service/" + car_id, headers=self.auth_header)
 
 
-    # @task(2)
-    # def service_list(self):
-    #     self.client.get("/car", headers=auth_header)
-
-    # @task
-    # def service_register(self):
-    #     self.client.post("/car", car, headers=auth_header)
+        self.client.post("/logout", headers=self.auth_header)
     
-    @task(8)
+    @task(1)
     def car_register(self):
         self.car["plate"] = "XXX-" + str(randint(1000, 9999))
 
@@ -70,22 +82,19 @@ class UserBehavior(TaskSet):
         if response.ok:
             car_id = response.json()['_id']
             self.client.delete("/car/" + car_id, headers=self.auth_header)
+
         self.client.post("/logout", headers=self.auth_header)
     
-    @task(4)
-    def user_list(self):
-        self.client.get("/user", headers=self.auth_header)
-        self.client.post("/logout", headers=self.auth_header)
-
-    @task(3)
+   
+    @task(1)
     def user_register(self):
-        self.user2["email"] = self.random_string(10) + "@mail.com"
+        self.user["email"] = self.random_string(10) + "@mail.com"
 
-        self.client.post("/user", self.user2)
+        self.client.post("/user", self.user)
 
         response = self.client.post("/login", {
-            "email": self.user2["email"],
-            "password": self.user2["password"]
+            "email": self.user["email"],
+            "password": self.user["password"]
         }, catch_response=True)
 
         if response.ok:
@@ -95,7 +104,17 @@ class UserBehavior(TaskSet):
         
         self.client.post("/logout", headers=self.auth_header)
     
-    @task(5)
+    @task(2)
+    def user_list(self):
+        self.client.get("/user", headers=self.auth_header)
+        self.client.post("/logout", headers=self.auth_header)
+
+    @task(2)
+    def service_list(self):
+        self.client.get("/service", headers=auth_header)
+        self.client.post("/logout", headers=self.auth_header)
+
+    @task(2)
     def car_list(self):
         self.client.get("/car", headers=self.auth_header)
         self.client.post("/logout", headers=self.auth_header)
